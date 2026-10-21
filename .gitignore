@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Виртуальное окружение
+venv/
+.venv/
+env/
+
+# Секреты
+.env
+.env.*
+!.env.example
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+*.log
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Claude Code (локальные настройки)
+.claude/settings.local.json
+
+# Vercel
+.vercel/

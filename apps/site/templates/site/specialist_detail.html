@@ -1,0 +1,95 @@
+{% extends "site/base.html" %}
+
+{% block title %}{{ profile.user.name }} — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+
+    <div class="card detail-hero">
+      <span class="avatar avatar-lg">{{ profile.user.name|default:profile.user.email|first|upper }}</span>
+      <div class="info" style="flex:1;">
+        <h1>{{ profile.user.name }}</h1>
+        <p class="sub">{{ profile.get_specialization_display }} · {{ profile.city|default:"Удалённо" }}{% if profile.country %}, {{ profile.country }}{% endif %}</p>
+        <div class="meta-row" style="margin-top:12px;">
+          <span class="badge">★ {{ profile.rating }} ({{ profile.reviews_count }} отзывов)</span>
+          <span class="badge badge-accent">{{ profile.get_status_display }}</span>
+          {% if profile.verified %}<span class="badge badge-success">Проверен</span>{% endif %}
+          <span class="badge">{{ profile.get_work_format_display }}</span>
+          <span class="badge">Опыт: {{ profile.experience_years }} л.</span>
+        </div>
+      </div>
+      {% if user.is_authenticated and user.pk != profile.user.pk %}
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a href="{% url 'site:chat_start' profile.user.pk %}" class="btn btn-primary">Написать</a>
+          <form method="post" action="{% url 'site:favorite_toggle' 'specialist' profile.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button type="submit" class="btn {% if is_favorited %}btn-secondary{% else %}btn-ghost{% endif %} btn-block">{% if is_favorited %}★ В избранном{% else %}☆ В избранное{% endif %}</button>
+          </form>
+          <a href="{% url 'site:report_create' 'specialist' profile.pk %}?next={{ request.path }}" class="text-faint" style="font-size:12px;text-align:center;">Пожаловаться</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="detail-layout">
+      <div>
+        <div class="card">
+          <h3 style="font-size:16px;margin-bottom:12px;">О себе</h3>
+          <p class="text-dim">{{ profile.bio|default:"Специалист пока не добавил описание." }}</p>
+          {% if profile.skills.all %}
+            <div class="tags">
+              {% for skill in profile.skills.all %}<span class="badge">{{ skill.name }}</span>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        {% if portfolio_items %}
+          <div class="card mt-24">
+            <h3 style="font-size:16px;margin-bottom:12px;">Портфолио</h3>
+            <div class="grid grid-2">
+              {% for item in portfolio_items %}
+                <a href="{% url 'site:work_detail' item.pk %}" class="card card-hover" style="padding:16px;text-decoration:none;color:inherit;">
+                  <div class="name" style="font-size:14px;">{{ item.title }}</div>
+                  <p class="bio" style="margin-top:6px;">{{ item.result|default:item.description }}</p>
+                  <div class="text-faint" style="font-size:12px;margin-top:8px;">👁 {{ item.views_count }} · ♥ {{ item.likes_count }}</div>
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="card mt-24">
+          <h3 style="font-size:16px;margin-bottom:6px;">Отзывы ({{ profile.reviews_count }})</h3>
+          {% if reviews %}
+            {% for review in reviews %}
+              <div class="review-row">
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="font-weight:700;">{{ review.author.name }}</span>
+                  <span class="stars">★ {{ review.rating }}</span>
+                </div>
+                <p class="text-dim" style="margin-top:6px;">{{ review.text }}</p>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-faint">Отзывов пока нет.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card side-card">
+        <h3 style="font-size:15px;margin-bottom:12px;">Условия</h3>
+        <div class="stat-line"><span>Ставка</span><span>
+          {% if profile.price_from and profile.price_to %}{{ profile.price_from }}–{{ profile.price_to }} c
+          {% elif profile.price_from %}от {{ profile.price_from }} c
+          {% else %}по договорённости{% endif %}
+        </span></div>
+        <div class="stat-line"><span>Формат</span><span>{{ profile.get_work_format_display }}</span></div>
+        <div class="stat-line"><span>Заказов выполнено</span><span>{{ profile.orders_count }}</span></div>
+        <div class="stat-line"><span>Доступность</span><span>{% if profile.is_available %}Свободен{% else %}Занят{% endif %}</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

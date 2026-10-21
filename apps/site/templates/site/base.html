@@ -1,0 +1,106 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}SMM Marketplace — площадка для SMM-специалистов{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'site/css/style.css' %}">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="{% url 'site:home' %}" class="brand">
+      <span class="brand-mark">S</span>
+      SMM Marketplace
+    </a>
+    <nav class="nav-main">
+      <a href="{% url 'site:home' %}" class="{% if request.path == '/' %}active{% endif %}">Главная</a>
+      <a href="{% url 'site:specialists_list' %}" class="{% if '/talents' in request.path %}active{% endif %}">Специалисты</a>
+      <a href="{% url 'site:jobs_list' %}" class="{% if '/vacancies' in request.path %}active{% endif %}">Вакансии</a>
+      <a href="{% url 'site:works_feed' %}" class="{% if '/works' in request.path %}active{% endif %}">Работы</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'site:deals_list' %}" class="{% if '/deals' in request.path %}active{% endif %}">Сделки</a>
+        <a href="{% url 'site:chat_list' %}" class="{% if '/messages' in request.path %}active{% endif %}">Сообщения{% if unread_messages_count %} <span class="unread-dot" style="display:inline-flex;">{{ unread_messages_count }}</span>{% endif %}</a>
+        <a href="{% url 'site:alerts_list' %}" class="{% if '/alerts' in request.path %}active{% endif %}">Уведомления{% if unread_alerts_count %} <span class="unread-dot" style="display:inline-flex;">{{ unread_alerts_count }}</span>{% endif %}</a>
+        <a href="{% url 'site:favorites_list' %}" class="{% if '/saved' in request.path %}active{% endif %}">Избранное</a>
+        {% if user.role == 'admin' %}
+          <a href="{% url 'site:panel_dashboard' %}" class="{% if '/panel' in request.path %}active{% endif %}">Панель{% if pending_complaints_count %} <span class="unread-dot" style="display:inline-flex;">{{ pending_complaints_count }}</span>{% endif %}</a>
+        {% endif %}
+      {% endif %}
+    </nav>
+    <div class="nav-auth">
+      {% if user.is_authenticated %}
+        <a href="{% url 'site:dashboard' %}" class="user-chip">
+          <span class="avatar avatar-sm">{{ user.name|default:user.email|first|upper }}</span>
+          {{ user.name|default:user.email }}
+        </a>
+        <a href="{% url 'site:logout' %}" class="btn btn-ghost btn-sm">Выйти</a>
+      {% else %}
+        <a href="{% url 'site:login' %}" class="btn btn-ghost btn-sm">Войти</a>
+        <a href="{% url 'site:register' %}" class="btn btn-primary btn-sm">Регистрация</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container mt-24">
+    {% if messages %}
+      <div class="alerts">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <span>© {% now "Y" %} SMM Marketplace</span>
+    <span>Площадка для поиска SMM-специалистов и заказов</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Reveal-on-scroll: purely additive — if this never runs, content stays fully visible.
+  if ('IntersectionObserver' in window) {
+    var targets = document.querySelectorAll('.grid > *, .cta-band, .filter-bar, .chat-shell');
+    targets.forEach(function (el) { el.classList.add('reveal'); });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry, idx) {
+        if (entry.isIntersecting) {
+          entry.target.style.transitionDelay = (idx % 6) * 0.06 + 's';
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    targets.forEach(function (el) { io.observe(el); });
+  }
+
+  // Count up the hero stat numbers on the home page.
+  document.querySelectorAll('.hero-stat b').forEach(function (el) {
+    var target = parseInt(el.textContent, 10);
+    if (isNaN(target)) return;
+    var start = null;
+    var duration = 900;
+    function step(ts) {
+      if (!start) start = ts;
+      var progress = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * eased);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+})();
+</script>
+
+</body>
+</html>

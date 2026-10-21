@@ -1,0 +1,34 @@
+{% extends "site/base.html" %}
+
+{% block title %}Модерация вакансий — Панель администратора{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow"><a href="{% url 'site:panel_dashboard' %}" style="color:inherit;">← Панель</a></span>
+        <h2 class="section-title">Вакансии</h2>
+      </div>
+    </div>
+
+    <div class="card" style="padding:8px;">
+      {% for job in jobs %}
+        <div class="list-row" style="padding:14px 12px;">
+          <div style="flex:1;">
+            <a href="{% url 'site:job_detail' job.pk %}" style="font-weight:700;font-size:14px;">{{ job.title }}</a>
+            <div class="text-dim" style="font-size:13px;margin-top:2px;">{{ job.company.name }} · {{ job.get_category_display }}</div>
+          </div>
+          <span class="badge {% if job.status == 'open' %}badge-success{% elif job.status == 'cancelled' %}badge-danger{% else %}badge-warning{% endif %}">{{ job.get_status_display }}</span>
+          {% if job.status == 'open' or job.status == 'in_progress' %}
+            <form method="post" action="{% url 'site:panel_job_moderate' job.pk 'close' %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-secondary">Закрыть</button></form>
+            <form method="post" action="{% url 'site:panel_job_moderate' job.pk 'cancel' %}" onsubmit="return confirm('Отменить вакансию?');">{% csrf_token %}<button type="submit" class="btn btn-sm btn-danger">Отменить</button></form>
+          {% endif %}
+        </div>
+      {% empty %}
+        <div class="empty-state">Вакансий нет.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

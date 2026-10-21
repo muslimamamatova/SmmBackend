@@ -1,0 +1,33 @@
+{% extends "site/base.html" %}
+
+{% block title %}Сообщения — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Диалоги</span>
+        <h2 class="section-title">Сообщения</h2>
+      </div>
+    </div>
+
+    {% if rows %}
+      <div class="card" style="padding:8px;">
+        {% for row in rows %}
+          <a href="{% url 'site:chat_detail' row.chat.pk %}" class="chat-list-row" style="text-decoration:none;">
+            <span class="avatar avatar-md">{{ row.other.name|default:"?"|first|upper }}</span>
+            <div style="flex:1;min-width:0;">
+              <div class="name">{{ row.other.name|default:"Пользователь удалён" }}</div>
+              <div class="preview">{% if row.last_message %}{{ row.last_message.text }}{% else %}Нет сообщений{% endif %}</div>
+            </div>
+            {% if row.unread %}<span class="unread-dot">{{ row.unread }}</span>{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><div class="icon">💬</div>У вас пока нет диалогов. Напишите специалисту или компании со страницы профиля.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

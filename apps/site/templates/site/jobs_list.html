@@ -1,0 +1,79 @@
+{% extends "site/base.html" %}
+
+{% block title %}Вакансии — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Каталог</span>
+        <h2 class="section-title">Вакансии</h2>
+        <p class="section-sub">{{ page.paginator.count }} открыт{{ page.paginator.count|pluralize:"а,ых" }} вакансий</p>
+      </div>
+      {% if user.is_authenticated and user.role == 'employer' %}
+        <a href="{% url 'site:job_create' %}" class="btn btn-primary">+ Разместить вакансию</a>
+      {% endif %}
+    </div>
+
+    <form method="get" class="filter-bar">
+      <div class="field-group">
+        <label for="{{ form.q.id_for_label }}">Поиск</label>
+        {{ form.q }}
+      </div>
+      <div class="field-group">
+        <label for="{{ form.category.id_for_label }}">Категория</label>
+        {{ form.category }}
+      </div>
+      <div class="field-group">
+        <label for="{{ form.city.id_for_label }}">Город</label>
+        {{ form.city }}
+      </div>
+      <div class="field-group">
+        <label for="{{ form.sort.id_for_label }}">Сортировка</label>
+        {{ form.sort }}
+      </div>
+      <button type="submit" class="btn btn-primary">Найти</button>
+    </form>
+
+    {% if page.object_list %}
+      <div class="grid grid-3">
+        {% for job in page.object_list %}
+          <a href="{% url 'site:job_detail' job.pk %}" class="card card-hover entity-card">
+            <div>
+              <div class="name">{{ job.title }}</div>
+              <div class="sub">{{ job.company.name }} · {{ job.get_category_display }}</div>
+            </div>
+            <p class="bio">{{ job.description }}</p>
+            <div class="meta-row">
+              <span class="badge">{{ job.city|default:"Удалённо" }}</span>
+              <span class="badge badge-accent">{{ job.get_budget_type_display }}</span>
+              <span class="badge">{{ job.get_work_format_display }}</span>
+            </div>
+            <div class="footer-row">
+              <span class="price">
+                {% if job.budget_from and job.budget_to %}{{ job.budget_from }}–{{ job.budget_to }} c
+                {% elif job.budget_from %}от {{ job.budget_from }} c
+                {% else %}по договорённости{% endif %}
+              </span>
+              <span class="text-faint">{{ job.created_at|timesince }} назад</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+
+      <div class="pagination">
+        {% if page.has_previous %}
+          <a href="?{{ request.GET.urlencode }}&page={{ page.previous_page_number }}">←</a>
+        {% endif %}
+        <span class="current">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}
+          <a href="?{{ request.GET.urlencode }}&page={{ page.next_page_number }}">→</a>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="empty-state"><div class="icon">📋</div>Открытых вакансий не найдено.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

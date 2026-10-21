@@ -1,0 +1,96 @@
+{% extends "site/base.html" %}
+
+{% block title %}{{ item.title }} — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+
+    {% if item.cover %}
+      <img src="{{ item.cover.url }}" alt="" style="width:100%;max-height:360px;object-fit:cover;border-radius:var(--radius-lg);margin-bottom:24px;">
+    {% else %}
+      <div class="work-cover-placeholder" style="height:220px;font-size:64px;margin-bottom:24px;">{{ item.get_category_display|first }}</div>
+    {% endif %}
+
+    <div class="card detail-hero">
+      <div class="info" style="flex:1;">
+        <h1>{{ item.title }}</h1>
+        <p class="sub">{{ item.get_category_display }} · 👁 {{ item.views_count }} просмотров · ♥ {{ item.likes_count }} лайков</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <form method="post" action="{% url 'site:work_like_toggle' item.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" class="btn {% if is_liked %}btn-secondary{% else %}btn-primary{% endif %}">{% if is_liked %}♥ Нравится{% else %}♡ Лайк{% endif %}</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <div>
+        {% if item.client_task %}
+          <div class="card">
+            <h3 style="font-size:16px;margin-bottom:12px;">Задача клиента</h3>
+            <p class="text-dim" style="white-space:pre-line;">{{ item.client_task }}</p>
+          </div>
+        {% endif %}
+
+        {% if item.work_done %}
+          <div class="card mt-24">
+            <h3 style="font-size:16px;margin-bottom:12px;">Что было сделано</h3>
+            <p class="text-dim" style="white-space:pre-line;">{{ item.work_done }}</p>
+          </div>
+        {% endif %}
+
+        {% if item.result %}
+          <div class="card mt-24">
+            <h3 style="font-size:16px;margin-bottom:12px;">Результат</h3>
+            <p class="text-dim" style="white-space:pre-line;">{{ item.result }}</p>
+          </div>
+        {% endif %}
+
+        {% if item.description %}
+          <div class="card mt-24">
+            <h3 style="font-size:16px;margin-bottom:12px;">Описание</h3>
+            <p class="text-dim" style="white-space:pre-line;">{{ item.description }}</p>
+          </div>
+        {% endif %}
+
+        {% if media %}
+          <div class="card mt-24">
+            <h3 style="font-size:16px;margin-bottom:12px;">Материалы</h3>
+            <div class="grid grid-2">
+              {% for m in media %}
+                {% if m.type == 'video' %}
+                  <video src="{{ m.file.url }}" controls style="width:100%;border-radius:var(--radius-sm);"></video>
+                {% else %}
+                  <img src="{{ m.file.url }}" alt="" style="width:100%;border-radius:var(--radius-sm);">
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="card side-card">
+        <h3 style="font-size:15px;margin-bottom:12px;">Автор</h3>
+        <a href="{% url 'site:specialist_detail' item.specialist.pk %}" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-bottom:16px;">
+          <span class="avatar avatar-md">{{ item.specialist.user.name|default:"?"|first|upper }}</span>
+          <div>
+            <div style="font-weight:700;font-size:14px;">{{ item.specialist.user.name }}</div>
+            <div class="text-dim" style="font-size:12.5px;">{{ item.specialist.get_specialization_display }}</div>
+          </div>
+        </a>
+        {% if item.period_from or item.period_to %}
+          <div class="stat-line"><span>Период</span><span>{{ item.period_from|date:"m.Y"|default:"—" }} – {{ item.period_to|date:"m.Y"|default:"н.в." }}</span></div>
+        {% endif %}
+        {% if user.is_authenticated and user.pk != item.specialist.user_id %}
+          <a href="{% url 'site:chat_start' item.specialist.user_id %}" class="btn btn-secondary btn-block mt-24">Написать специалисту</a>
+        {% endif %}
+        <a href="{% url 'site:report_create' 'portfolio' item.pk %}?next={{ request.path }}" class="text-faint" style="font-size:12px;text-align:center;display:block;margin-top:12px;">Пожаловаться</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "site/base.html" %}
+
+{% block title %}Сделка №{{ order.pk }} — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+
+    <div class="card detail-hero">
+      <div class="info" style="flex:1;">
+        <h1>{{ order.job.title|default:"Прямой заказ" }}</h1>
+        <p class="sub">{{ order.company.name }} → {{ order.specialist.user.name }}</p>
+        <div class="meta-row" style="margin-top:12px;">
+          <span class="badge {% if order.status == 'completed' %}badge-success{% elif order.status == 'cancelled' %}badge-danger{% elif order.status == 'review' %}badge-warning{% else %}badge-accent{% endif %}">{{ order.get_status_display }}</span>
+          <span class="badge">{{ order.price }} c</span>
+          {% if order.deadline %}<span class="badge">до {{ order.deadline }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <div>
+        <div class="card">
+          <h3 style="font-size:16px;margin-bottom:12px;">Действия</h3>
+          <div class="btn-row" style="display:flex;gap:10px;flex-wrap:wrap;">
+            {% if is_specialist and order.status == 'new' or is_specialist and order.status == 'discussion' %}
+              <form method="post" action="{% url 'site:deal_transition' order.pk 'accept' %}">{% csrf_token %}<button type="submit" class="btn btn-primary">Принять сделку</button></form>
+            {% endif %}
+            {% if is_specialist and order.status == 'accepted' %}
+              <form method="post" action="{% url 'site:deal_transition' order.pk 'start' %}">{% csrf_token %}<button type="submit" class="btn btn-primary">Начать работу</button></form>
+            {% endif %}
+            {% if is_specialist and order.status == 'in_progress' %}
+              <form method="post" action="{% url 'site:deal_transition' order.pk 'submit' %}">{% csrf_token %}<button type="submit" class="btn btn-primary">Сдать на проверку</button></form>
+            {% endif %}
+            {% if is_company and order.status == 'review' or is_company and order.status == 'in_progress' %}
+              <form method="post" action="{% url 'site:deal_transition' order.pk 'complete' %}">{% csrf_token %}<button type="submit" class="btn btn-primary">Завершить и принять работу</button></form>
+            {% endif %}
+            {% if is_company or is_specialist %}
+              {% if order.status == 'new' or order.status == 'discussion' or order.status == 'accepted' or order.status == 'in_progress' %}
+                <form method="post" action="{% url 'site:deal_transition' order.pk 'cancel' %}" onsubmit="return confirm('Отменить сделку?');">{% csrf_token %}<button type="submit" class="btn btn-danger">Отменить</button></form>
+              {% endif %}
+            {% endif %}
+            {% if order.status == 'completed' %}
+              <span class="text-faint">Сделка завершена{% if order.completed_at %} {{ order.completed_at|date:"d.m.Y" }}{% endif %}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <h3 style="font-size:16px;margin-bottom:12px;">Отзыв</h3>
+          {% if review %}
+            <div class="review-row" style="border:none;padding:0;">
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-weight:700;">{{ review.author.name }}</span>
+                <span class="stars">★ {{ review.rating }}</span>
+              </div>
+              <p class="text-dim" style="margin-top:6px;">{{ review.text }}</p>
+            </div>
+          {% elif can_review %}
+            <p class="text-dim" style="margin-bottom:12px;">Сделка завершена — поделитесь впечатлением о работе.</p>
+            <a href="{% url 'site:deal_review' order.pk %}" class="btn btn-primary">Оставить отзыв</a>
+          {% else %}
+            <p class="text-faint">Отзыв появится после завершения сделки.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card side-card">
+        <h3 style="font-size:15px;margin-bottom:12px;">Участники</h3>
+        <div class="stat-line"><span>Компания</span><span>{{ order.company.name }}</span></div>
+        <div class="stat-line"><span>Специалист</span><span><a href="{% url 'site:specialist_detail' order.specialist.pk %}">{{ order.specialist.user.name }}</a></span></div>
+        <div class="stat-line"><span>Цена</span><span>{{ order.price }} c</span></div>
+        <div class="stat-line"><span>Создана</span><span>{{ order.created_at|date:"d.m.Y" }}</span></div>
+        {% if is_specialist %}
+          <a href="{% url 'site:chat_start' order.company.user_id %}" class="btn btn-secondary btn-block mt-24">Написать компании</a>
+        {% elif is_company %}
+          <a href="{% url 'site:chat_start' order.specialist.user_id %}" class="btn btn-secondary btn-block mt-24">Написать специалисту</a>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

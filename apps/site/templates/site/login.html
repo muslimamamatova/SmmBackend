@@ -1,0 +1,40 @@
+{% extends "site/base.html" %}
+
+{% block title %}Вход — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="card form-card">
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:4px;">Вход в аккаунт</h1>
+      <p class="text-dim" style="margin-bottom:22px;">Рады видеть вас снова.</p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for error in form.non_field_errors %}
+          <div class="alert alert-error" style="margin-bottom:16px;">{{ error }}</div>
+        {% endfor %}
+
+        <div class="field-group">
+          <label for="{{ form.email.id_for_label }}">Email</label>
+          {{ form.email }}
+          {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="field-group">
+          <label for="{{ form.password.id_for_label }}">Пароль</label>
+          {{ form.password }}
+          {% for error in form.password.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Войти</button>
+      </form>
+
+      <p class="text-dim" style="text-align:center;margin-top:18px;font-size:13.5px;">
+        Нет аккаунта? <a href="{% url 'site:register' %}" style="color:var(--accent-2);font-weight:700;">Зарегистрироваться</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "site/base.html" %}
+
+{% block title %}Моё портфолио — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Портфолио</span>
+        <h2 class="section-title">Мои кейсы</h2>
+      </div>
+      <a href="{% url 'site:portfolio_create' %}" class="btn btn-primary">+ Добавить кейс</a>
+    </div>
+
+    {% if items %}
+      <div class="grid grid-3">
+        {% for item in items %}
+          <div class="card entity-card">
+            <div class="name">{{ item.title }}</div>
+            <div class="sub">{{ item.get_category_display }}</div>
+            <p class="bio">{{ item.result|default:item.description }}</p>
+            <div class="meta-row">
+              <span class="badge">★ {{ item.likes_count }} лайков</span>
+              <span class="badge">{{ item.views_count }} просмотров</span>
+            </div>
+            <div class="footer-row">
+              <a href="{% url 'site:portfolio_edit' item.pk %}" class="btn btn-secondary btn-sm">Изменить</a>
+              <form method="post" action="{% url 'site:portfolio_delete' item.pk %}" onsubmit="return confirm('Удалить кейс?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><div class="icon">🗂️</div>У вас пока нет кейсов в портфолио. Добавьте первый, чтобы компании видели ваши работы.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "site/base.html" %}
+
+{% block title %}Избранное — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Сохранённое</span>
+        <h2 class="section-title">Избранное</h2>
+      </div>
+    </div>
+
+    <h3 style="font-size:16px;margin-bottom:14px;">Специалисты</h3>
+    {% if specialists %}
+      <div class="grid grid-3 mt-24" style="margin-top:0;margin-bottom:32px;">
+        {% for profile in specialists %}
+          <div class="card entity-card">
+            <a href="{% url 'site:specialist_detail' profile.pk %}" style="text-decoration:none;color:inherit;">
+              <div class="top">
+                <span class="avatar avatar-md">{{ profile.user.name|default:profile.user.email|first|upper }}</span>
+                <div>
+                  <div class="name">{{ profile.user.name }}</div>
+                  <div class="sub">{{ profile.get_specialization_display }}</div>
+                </div>
+              </div>
+              <div class="meta-row">
+                <span class="badge">{{ profile.city|default:"Удалённо" }}</span>
+              </div>
+            </a>
+            <div class="footer-row">
+              <span class="stars">★ <span class="rating-num" style="color:var(--text);">{{ profile.rating }}</span></span>
+              <form method="post" action="{% url 'site:favorite_toggle' 'specialist' profile.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'site:favorites_list' %}">
+                <button type="submit" class="btn btn-sm btn-ghost">Убрать</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-faint" style="margin-bottom:32px;">Нет сохранённых специалистов.</p>
+    {% endif %}
+
+    <h3 style="font-size:16px;margin-bottom:14px;">Вакансии</h3>
+    {% if jobs %}
+      <div class="grid grid-3">
+        {% for job in jobs %}
+          <div class="card entity-card">
+            <a href="{% url 'site:job_detail' job.pk %}" style="text-decoration:none;color:inherit;">
+              <div>
+                <div class="name">{{ job.title }}</div>
+                <div class="sub">{{ job.company.name }}</div>
+              </div>
+              <div class="meta-row">
+                <span class="badge">{{ job.city|default:"Удалённо" }}</span>
+                <span class="badge {% if job.status == 'open' %}badge-success{% else %}badge-warning{% endif %}">{{ job.get_status_display }}</span>
+              </div>
+            </a>
+            <div class="footer-row">
+              <span></span>
+              <form method="post" action="{% url 'site:favorite_toggle' 'job' job.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'site:favorites_list' %}">
+                <button type="submit" class="btn btn-sm btn-ghost">Убрать</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-faint">Нет сохранённых вакансий.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "site/base.html" %}
+
+{% block title %}Кабинет — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Кабинет компании</span>
+        <h2 class="section-title">{{ company.name }}</h2>
+      </div>
+      <a href="{% url 'site:job_create' %}" class="btn btn-primary">+ Разместить вакансию</a>
+    </div>
+
+    <div class="dash-layout">
+      <div class="card">
+        <div class="dash-summary" style="margin-bottom:16px;">
+          <span class="avatar avatar-lg">{{ company.name|first|upper }}</span>
+          <div>
+            <h2>{{ company.name }}</h2>
+            <p>{{ company.industry|default:"Отрасль не указана" }}</p>
+          </div>
+        </div>
+        <div class="stat-line"><span>Город</span><span>{{ company.city|default:"—" }}</span></div>
+        <div class="stat-line"><span>Вакансий</span><span>{{ jobs.count }}</span></div>
+        <div class="stat-line"><span>Email</span><span>{{ user.email }}</span></div>
+        {% if company.website %}<div class="stat-line"><span>Сайт</span><span>{{ company.website }}</span></div>{% endif %}
+        <a href="{% url 'site:profile_edit' %}" class="btn btn-secondary btn-block mt-24">Редактировать профиль</a>
+        <a href="{% url 'site:deals_list' %}" class="btn btn-secondary btn-block" style="margin-top:8px;">Мои сделки</a>
+        <a href="{% url 'site:favorites_list' %}" class="btn btn-secondary btn-block" style="margin-top:8px;">Избранное</a>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3 style="font-size:16px;margin-bottom:12px;">Мои вакансии</h3>
+          {% if jobs %}
+            {% for job in jobs %}
+              <div class="list-row">
+                <div style="flex:1;">
+                  <a href="{% url 'site:job_detail' job.pk %}" style="font-weight:700;font-size:14.5px;">{{ job.title }}</a>
+                  <div class="text-dim" style="font-size:13px;margin-top:2px;">{{ job.get_category_display }} · откликов: {{ job.applications.count }}</div>
+                </div>
+                <span class="badge {% if job.status == 'open' %}badge-success{% else %}badge-warning{% endif %}">{{ job.get_status_display }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state"><div class="icon">📋</div>Вы ещё не разместили ни одной вакансии.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

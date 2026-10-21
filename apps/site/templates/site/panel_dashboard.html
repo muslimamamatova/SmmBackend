@@ -1,0 +1,33 @@
+{% extends "site/base.html" %}
+
+{% block title %}Панель администратора — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Администрирование</span>
+        <h2 class="section-title">Панель управления</h2>
+      </div>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="card"><div class="text-faint" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;">Пользователей</div><div style="font-size:28px;font-weight:800;margin-top:6px;">{{ stats.users }}</div></div>
+      <div class="card"><div class="text-faint" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;">Специалистов</div><div style="font-size:28px;font-weight:800;margin-top:6px;">{{ stats.specialists }}</div></div>
+      <div class="card"><div class="text-faint" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;">Компаний</div><div style="font-size:28px;font-weight:800;margin-top:6px;">{{ stats.companies }}</div></div>
+      <div class="card"><div class="text-faint" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;">Открытых вакансий</div><div style="font-size:28px;font-weight:800;margin-top:6px;">{{ stats.jobs_open }}</div></div>
+      <div class="card"><div class="text-faint" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;">Сделок</div><div style="font-size:28px;font-weight:800;margin-top:6px;">{{ stats.orders }}</div></div>
+      <div class="card"><div class="text-faint" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;">Жалоб на рассмотрении</div><div style="font-size:28px;font-weight:800;margin-top:6px;color:{% if stats.complaints_pending %}var(--warning){% else %}var(--text){% endif %};">{{ stats.complaints_pending }}</div></div>
+    </div>
+
+    <div class="hero-actions mt-24">
+      <a href="{% url 'site:panel_users' %}" class="btn btn-secondary">Пользователи</a>
+      <a href="{% url 'site:panel_complaints' %}" class="btn btn-secondary">Жалобы</a>
+      <a href="{% url 'site:panel_jobs' %}" class="btn btn-secondary">Модерация вакансий</a>
+      <a href="/admin/" class="btn btn-ghost">Django admin</a>
+      <a href="/api/v1/swagger/" class="btn btn-ghost">Swagger API</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

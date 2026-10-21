@@ -1,0 +1,74 @@
+{% extends "site/base.html" %}
+
+{% block title %}Лента работ — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Кейсы специалистов</span>
+        <h2 class="section-title">Лента работ</h2>
+        <p class="section-sub">{{ page.paginator.count }} опубликован{{ page.paginator.count|pluralize:"а,о,о" }} работ{{ page.paginator.count|pluralize:"а,ы," }}</p>
+      </div>
+    </div>
+
+    <form method="get" class="filter-bar">
+      <div class="field-group">
+        <label for="{{ form.category.id_for_label }}">Категория</label>
+        {{ form.category }}
+      </div>
+      <div class="field-group">
+        <label for="{{ form.sort.id_for_label }}">Сортировка</label>
+        {{ form.sort }}
+      </div>
+      <button type="submit" class="btn btn-primary">Применить</button>
+    </form>
+
+    {% if page.object_list %}
+      <div class="grid grid-3">
+        {% for item in page.object_list %}
+          <div class="card card-hover entity-card">
+            <a href="{% url 'site:work_detail' item.pk %}" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:14px;">
+              {% if item.cover %}
+                <img src="{{ item.cover.url }}" alt="" style="width:100%;height:150px;object-fit:cover;border-radius:var(--radius-sm);">
+              {% else %}
+                <div class="work-cover-placeholder">{{ item.get_category_display|first }}</div>
+              {% endif %}
+              <div class="top">
+                <span class="avatar avatar-sm">{{ item.specialist.user.name|default:"?"|first|upper }}</span>
+                <div>
+                  <div class="name" style="font-size:14px;">{{ item.specialist.user.name }}</div>
+                  <div class="sub">{{ item.get_category_display }}</div>
+                </div>
+              </div>
+              <div class="name">{{ item.title }}</div>
+              <p class="bio">{{ item.result|default:item.description }}</p>
+            </a>
+            <div class="footer-row">
+              <span class="text-faint" style="font-size:12.5px;">👁 {{ item.views_count }} · ♥ {{ item.likes_count }}</span>
+              <form method="post" action="{% url 'site:work_like_toggle' item.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="btn btn-sm {% if item.pk in liked_ids %}btn-secondary{% else %}btn-ghost{% endif %}">{% if item.pk in liked_ids %}♥ Нравится{% else %}♡ Лайк{% endif %}</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="pagination">
+        {% if page.has_previous %}
+          <a href="?{{ request.GET.urlencode }}&page={{ page.previous_page_number }}">←</a>
+        {% endif %}
+        <span class="current">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}
+          <a href="?{{ request.GET.urlencode }}&page={{ page.next_page_number }}">→</a>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="empty-state"><div class="icon">🎨</div>Работ пока нет. Специалисты ещё не опубликовали кейсы в портфолио.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

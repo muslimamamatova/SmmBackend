@@ -1,0 +1,33 @@
+{% extends "site/base.html" %}
+
+{% block title %}Сделки — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Заказы</span>
+        <h2 class="section-title">Мои сделки</h2>
+      </div>
+    </div>
+
+    {% if orders %}
+      <div class="card" style="padding:8px;">
+        {% for order in orders %}
+          <a href="{% url 'site:deal_detail' order.pk %}" class="list-row" style="text-decoration:none;padding:14px 12px;">
+            <span class="avatar avatar-sm">{{ order.specialist.user.name|default:"?"|first|upper }}</span>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:14px;">{{ order.job.title|default:"Прямой заказ" }}</div>
+              <div class="text-dim" style="font-size:13px;margin-top:2px;">{{ order.company.name }} → {{ order.specialist.user.name }} · {{ order.price }} c</div>
+            </div>
+            <span class="badge {% if order.status == 'completed' %}badge-success{% elif order.status == 'cancelled' %}badge-danger{% elif order.status == 'review' %}badge-warning{% else %}badge-accent{% endif %}">{{ order.get_status_display }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><div class="icon">🤝</div>Сделок пока нет. Они появляются, когда компания принимает отклик специалиста.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

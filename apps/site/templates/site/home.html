@@ -1,0 +1,173 @@
+{% extends "site/base.html" %}
+
+{% block content %}
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">SMM Marketplace</span>
+      <h1>Находите <span class="grad">SMM-специалистов</span>,<br>которые двигают ваш бренд</h1>
+      <p class="lead">Вакансии, отклики и заказы для менеджеров соцсетей, таргетологов, контент-мейкеров и дизайнеров — в одном месте.</p>
+      <div class="hero-actions">
+        {% if not user.is_authenticated %}
+          <a href="{% url 'site:register' %}" class="btn btn-primary">Начать бесплатно</a>
+          <a href="{% url 'site:specialists_list' %}" class="btn btn-secondary">Смотреть специалистов</a>
+        {% else %}
+          <a href="{% url 'site:dashboard' %}" class="btn btn-primary">Перейти в кабинет</a>
+          <a href="{% url 'site:jobs_list' %}" class="btn btn-secondary">Смотреть вакансии</a>
+        {% endif %}
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>{{ stats.specialists }}</b><span>специалистов</span></div>
+        <div class="hero-stat"><b>{{ stats.jobs }}</b><span>открытых вакансий</span></div>
+        <div class="hero-stat"><b>{{ stats.companies }}</b><span>компаний</span></div>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="float-card fc-1">
+        <div class="text-faint" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Новый отклик</div>
+        <div style="font-weight:700;">Таргетолог откликнулся на вакансию «SMM для Instagram»</div>
+      </div>
+      <div class="float-card fc-3">
+        <div class="stars">★★★★★</div>
+        <div class="text-dim" style="margin-top:4px;">«Отличная работа, всё в срок»</div>
+      </div>
+      <div class="float-card fc-2">
+        <div class="text-faint" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Заказ завершён</div>
+        <div style="font-weight:700;color:var(--accent-2);">+ 5.0 рейтинг</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Топ специалисты</span>
+        <h2 class="section-title">Лучшие по рейтингу</h2>
+      </div>
+      <a href="{% url 'site:specialists_list' %}" class="btn btn-secondary btn-sm">Все специалисты →</a>
+    </div>
+
+    {% if top_specialists %}
+      <div class="grid grid-3">
+        {% for profile in top_specialists %}
+          <a href="{% url 'site:specialist_detail' profile.pk %}" class="card card-hover entity-card">
+            <div class="top">
+              <span class="avatar avatar-md">{{ profile.user.name|default:profile.user.email|first|upper }}</span>
+              <div>
+                <div class="name">{{ profile.user.name }}</div>
+                <div class="sub">{{ profile.get_specialization_display }}</div>
+              </div>
+            </div>
+            <p class="bio">{{ profile.bio|default:"Специалист пока не добавил описание." }}</p>
+            <div class="meta-row">
+              <span class="badge">{{ profile.city|default:"Удалённо" }}</span>
+              {% if profile.verified %}<span class="badge badge-success">Проверен</span>{% endif %}
+            </div>
+            <div class="footer-row">
+              <span class="stars">★ <span class="rating-num" style="color:var(--text);">{{ profile.rating }}</span> <span class="text-faint">({{ profile.reviews_count }})</span></span>
+              {% if profile.price_from %}<span class="price">от {{ profile.price_from }} c</span>{% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><div class="icon">👋</div>Специалисты ещё не зарегистрировались.</div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Вакансии</span>
+        <h2 class="section-title">Свежие заказы</h2>
+      </div>
+      <a href="{% url 'site:jobs_list' %}" class="btn btn-secondary btn-sm">Все вакансии →</a>
+    </div>
+
+    {% if latest_jobs %}
+      <div class="grid grid-3">
+        {% for job in latest_jobs %}
+          <a href="{% url 'site:job_detail' job.pk %}" class="card card-hover entity-card">
+            <div>
+              <div class="name">{{ job.title }}</div>
+              <div class="sub">{{ job.company.name }} · {{ job.get_category_display }}</div>
+            </div>
+            <p class="bio">{{ job.description }}</p>
+            <div class="meta-row">
+              <span class="badge">{{ job.city|default:"Удалённо" }}</span>
+              <span class="badge badge-accent">{{ job.get_budget_type_display }}</span>
+            </div>
+            <div class="footer-row">
+              <span class="price">
+                {% if job.budget_from and job.budget_to %}{{ job.budget_from }}–{{ job.budget_to }} c
+                {% elif job.budget_from %}от {{ job.budget_from }} c
+                {% else %}по договорённости{% endif %}
+              </span>
+              <span class="text-faint">{{ job.created_at|timesince }} назад</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><div class="icon">📋</div>Открытых вакансий пока нет.</div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Лента работ</span>
+        <h2 class="section-title">Свежие кейсы</h2>
+      </div>
+      <a href="{% url 'site:works_feed' %}" class="btn btn-secondary btn-sm">Вся лента →</a>
+    </div>
+
+    {% if latest_works %}
+      <div class="grid grid-3">
+        {% for item in latest_works %}
+          <a href="{% url 'site:work_detail' item.pk %}" class="card card-hover entity-card">
+            {% if item.cover %}
+              <img src="{{ item.cover.url }}" alt="" style="width:100%;height:150px;object-fit:cover;border-radius:var(--radius-sm);">
+            {% else %}
+              <div class="work-cover-placeholder">{{ item.get_category_display|first }}</div>
+            {% endif %}
+            <div class="top">
+              <span class="avatar avatar-sm">{{ item.specialist.user.name|default:"?"|first|upper }}</span>
+              <div>
+                <div class="name" style="font-size:14px;">{{ item.specialist.user.name }}</div>
+                <div class="sub">{{ item.get_category_display }}</div>
+              </div>
+            </div>
+            <div class="name">{{ item.title }}</div>
+            <div class="footer-row">
+              <span class="text-faint" style="font-size:12.5px;">👁 {{ item.views_count }} · ♥ {{ item.likes_count }}</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><div class="icon">🎨</div>Кейсов пока нет.</div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-band">
+      <h2>Готовы начать?</h2>
+      <p>Зарегистрируйтесь как компания, чтобы разместить вакансию, или как специалист, чтобы найти заказ.</p>
+      <div class="hero-actions">
+        <a href="{% url 'site:register' %}" class="btn btn-primary">Создать аккаунт</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

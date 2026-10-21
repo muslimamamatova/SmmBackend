@@ -1,0 +1,95 @@
+{% extends "site/base.html" %}
+
+{% block title %}{{ other.name|default:"Диалог" }} — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow"><a href="{% url 'site:chat_list' %}" style="color:inherit;">← Все диалоги</a></span>
+        <h2 class="section-title">{{ other.name|default:"Диалог" }}</h2>
+      </div>
+    </div>
+
+    <div class="chat-shell">
+      <div class="card chat-sidebar">
+        {% for row in rows %}
+          <a href="{% url 'site:chat_detail' row.chat.pk %}" class="chat-list-row {% if row.chat.pk == chat.pk %}active{% endif %}" style="text-decoration:none;">
+            <span class="avatar avatar-md">{{ row.other.name|default:"?"|first|upper }}</span>
+            <div style="flex:1;min-width:0;">
+              <div class="name">{{ row.other.name|default:"Пользователь удалён" }}</div>
+              <div class="preview">{% if row.last_message %}{{ row.last_message.text }}{% else %}Нет сообщений{% endif %}</div>
+            </div>
+            {% if row.unread %}<span class="unread-dot">{{ row.unread }}</span>{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+
+      <div class="card chat-window">
+        <div class="chat-window-head">
+          <span class="avatar avatar-sm">{{ other.name|default:"?"|first|upper }}</span>
+          <div style="font-weight:700;">{{ other.name|default:"Пользователь удалён" }}</div>
+        </div>
+
+        <div id="chat-messages" class="chat-messages" data-chat-id="{{ chat.pk }}" data-poll-url="{% url 'site:chat_poll' chat.pk %}">
+          {% for m in chat_messages %}
+            <div class="bubble {% if m.sender_id == request.user.id %}mine{% else %}theirs{% endif %}" data-id="{{ m.pk }}">
+              {{ m.text }}
+              <span class="meta">{{ m.sender.name }} · {{ m.created_at|date:"H:i" }}</span>
+            </div>
+          {% empty %}
+            <p class="text-faint" style="text-align:center;margin:auto;">Сообщений пока нет. Напишите первым!</p>
+          {% endfor %}
+        </div>
+
+        <form method="post" class="chat-input-bar">
+          {% csrf_token %}
+          <textarea name="text" class="field" placeholder="Напишите сообщение…" required></textarea>
+          <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var box = document.getElementById('chat-messages');
+  if (!box) return;
+  box.scrollTop = box.scrollHeight;
+
+  var pollUrl = box.dataset.pollUrl;
+  var lastId = 0;
+  box.querySelectorAll('[data-id]').forEach(function (el) {
+    lastId = Math.max(lastId, parseInt(el.dataset.id, 10) || 0);
+  });
+
+  function poll() {
+    fetch(pollUrl + '?after=' + lastId)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.messages || !data.messages.length) return;
+        var atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
+        data.messages.forEach(function (m) {
+          lastId = Math.max(lastId, m.id);
+          var div = document.createElement('div');
+          div.className = 'bubble ' + (m.mine ? 'mine' : 'theirs');
+          div.dataset.id = m.id;
+          var textNode = document.createTextNode(m.text);
+          div.appendChild(textNode);
+          var meta = document.createElement('span');
+          meta.className = 'meta';
+          meta.textContent = m.sender_name + ' · ' + m.created_at;
+          div.appendChild(meta);
+          box.appendChild(div);
+        });
+        if (atBottom) box.scrollTop = box.scrollHeight;
+      })
+      .catch(function () {});
+  }
+
+  setInterval(poll, 4000);
+})();
+</script>
+{% endblock %}

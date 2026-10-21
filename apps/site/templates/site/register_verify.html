@@ -1,0 +1,35 @@
+{% extends "site/base.html" %}
+
+{% block title %}Подтверждение email — SMM Marketplace{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="card form-card">
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:4px;">Подтвердите email</h1>
+      <p class="text-dim" style="margin-bottom:22px;">Мы отправили 6-значный код на <b style="color:var(--text);">{{ email }}</b>.</p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for error in form.non_field_errors %}
+          <div class="alert alert-error" style="margin-bottom:16px;">{{ error }}</div>
+        {% endfor %}
+
+        <div class="field-group">
+          <label for="{{ form.code.id_for_label }}">{{ form.code.label }}</label>
+          {{ form.code }}
+          {% for error in form.code.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Подтвердить</button>
+      </form>
+
+      <form method="post" style="margin-top:14px;">
+        {% csrf_token %}
+        <button type="submit" name="resend" value="1" class="btn btn-ghost btn-block btn-sm">Отправить код повторно</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
