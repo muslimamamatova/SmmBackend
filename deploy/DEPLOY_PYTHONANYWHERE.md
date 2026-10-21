@@ -71,7 +71,7 @@ mkdir -p media
 
 **Code → WSGI configuration file** — откройте ссылку, удалите всё содержимое
 и вставьте код из [`deploy/pythonanywhere_wsgi.py`](pythonanywhere_wsgi.py),
-заменив `mslm0990` на свой логин. Нажмите **Save**.
+и нажмите **Save**.
 
 **Static files** — добавьте две строки:
 
