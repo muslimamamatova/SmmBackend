@@ -1,7 +1,7 @@
 # Деплой на PythonAnywhere
 
-Везде ниже `USERNAME` — ваш логин на PythonAnywhere.
-Сайт будет доступен по адресу `https://USERNAME.pythonanywhere.com`.
+Логин на PythonAnywhere: `mslm0990`.
+Сайт будет доступен по адресу `https://mslm0990.pythonanywhere.com`.
 
 ## 1. Регистрация
 
@@ -34,8 +34,8 @@ nano .env
 ```ini
 SECRET_KEY=<ключ, который напечатала команда выше>
 DEBUG=False
-ALLOWED_HOSTS=USERNAME.pythonanywhere.com
-CSRF_TRUSTED_ORIGINS=https://USERNAME.pythonanywhere.com
+ALLOWED_HOSTS=mslm0990.pythonanywhere.com
+CSRF_TRUSTED_ORIGINS=https://mslm0990.pythonanywhere.com
 SECURE_SSL_REDIRECT=True
 ```
 
@@ -60,25 +60,25 @@ mkdir -p media
 **Virtualenv**
 
 ```
-/home/USERNAME/.virtualenvs/smm
+/home/mslm0990/.virtualenvs/smm
 ```
 
 **Code → Source code**
 
 ```
-/home/USERNAME/SmmBackend
+/home/mslm0990/SmmBackend
 ```
 
 **Code → WSGI configuration file** — откройте ссылку, удалите всё содержимое
 и вставьте код из [`deploy/pythonanywhere_wsgi.py`](pythonanywhere_wsgi.py),
-заменив `USERNAME` на свой логин. Нажмите **Save**.
+заменив `mslm0990` на свой логин. Нажмите **Save**.
 
 **Static files** — добавьте две строки:
 
 | URL       | Directory                              |
 |-----------|----------------------------------------|
-| `/static/` | `/home/USERNAME/SmmBackend/staticfiles` |
-| `/media/`  | `/home/USERNAME/SmmBackend/media`       |
+| `/static/` | `/home/mslm0990/SmmBackend/staticfiles` |
+| `/media/`  | `/home/mslm0990/SmmBackend/media`       |
 
 **Security** → включите **Force HTTPS**.
 
